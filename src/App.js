@@ -1,33 +1,57 @@
-import { useState, useEffect } from "react";
 import { Input } from "./Input";
+import { Product } from "./Product";
+import { useState, useEffect } from "react";
 import "./App.css";
-import { Todolist } from "./Todolist";
 
 const App = () => {
-  const [todos, setTodos] =useState(JSON.parse(localStorage.getItem("todos")) ?? [])
-  const [todo, setTodo] = useState('');
-  useEffect(()=>{
-    localStorage.setItem('todos',JSON.stringify(todos))
-  },[todos])
+  const [cart, setCart] = useState(
+    JSON.parse(localStorage.getItem("cart")) || []
+  );
 
-  const addTodo = () => {
-    if (todo !== "") {
-      setTodos([...todos, todo]);
-      setTodo("");
-    }
-  };
-
-  const deleteTodo = (text) => {
-    const newTodos = todos.filter((todo) => {
-      return todo !== text;
+  const [productElements, setProductElements] = useState({
+    name: "",
+    description: "",
+    price: "",
+    url: "",
+  });
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+  const handleChange = (prop, event) => {
+    setProductElements({
+      ...productElements,
+      ...{ [prop]: event.target.value },
     });
-    setTodos(newTodos);
   };
+  const handleClick = () => {
+    setCart([...cart, productElements]);
+    setProductElements({
+      name: "",
+      description: "",
+      price: "",
+      url: "",
+    });
+  };
+  const deleteList = (index) => {
+    const updatedCart = cart.filter((item, k) => k !== index);
+    setCart(updatedCart);
+  };
+
   return (
     <div className="App">
-      <h1>React Todo App</h1>
-      <Input todo={todo} setTodo={setTodo} addTodo={addTodo}/>
-      <Todolist  todos={todos} deleteTodo={deleteTodo}/>
+      <header>
+        <h1>Products List</h1>
+        <Input
+          productElements={productElements}
+          handleChange={handleChange}
+          handleClick={handleClick}
+        />
+      </header>
+      <main className="cart-list">
+        <div className="cart-item">
+          <Product arr={cart} deleteList={deleteList} />
+        </div>
+      </main>
     </div>
   );
 };
